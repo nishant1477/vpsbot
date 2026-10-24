@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Tickets{% endblock %}
+{% block page_title %}Support Tickets{% endblock %}
+{% block page_sub %}{{ tickets|length }} ticket(s) — transcripts stored automatically{% endblock %}
+
+{% block content %}
+<div class="card reveal" data-skeleton="500">
+  {% if tickets %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Subject</th><th>Creator</th><th>Category</th><th>Claimed</th><th>Created</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td class="mono">{{ '%04d'|format(t['ticket_number']) }}</td>
+          <td><strong>{{ t['subject'] }}</strong></td>
+          <td>{{ t['creator_name'] or '—' }}</td>
+          <td class="dim">{{ t['category']|title }}</td>
+          <td>{{ '✅' if t['claimer_id'] else '—' }}</td>
+          <td class="dim">{{ t['created_at']|ts }}</td>
+          <td><span class="badge {{ t['status']|status_class }}">{{ t['status']|pretty_status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="e-icon"><i class="fa-solid fa-headset"></i></div>
+    <h4>No tickets yet</h4>
+    <p>Post a panel with <span class="mono">!ticket</span> in Discord.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

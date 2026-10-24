@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Create VPS{% endblock %}
+{% block page_title %}Create VPS{% endblock %}
+{% block page_sub %}Provisioning runs through the Discord wizard with automatic node scheduling{% endblock %}
+
+{% block content %}
+<div class="grid-half">
+  <div class="card reveal" data-skeleton="400">
+    <div class="card-title"><i class="fa-solid fa-circle-info"></i> How provisioning works</div>
+    <p class="dim" style="font-size:13.5px;line-height:1.8">
+      The web panel is read-only for safety: instances are provisioned through the Discord
+      <span class="mono">!create</span> wizard so that node scheduling, capacity checks and
+      credentials delivery all happen in one auditable place.
+    </p>
+    <ul style="margin:14px 0 0 18px;color:var(--text-dim);font-size:13px;line-height:2">
+      <li>The scheduler picks the <strong>least-loaded online node</strong> that fits your plan.</li>
+      <li>Root passwords are <strong>encrypted at rest</strong> and shown once.</li>
+      <li>Status updates stream back via the node agent heartbeat.</li>
+    </ul>
+    <div style="margin-top:18px">
+      <a class="btn btn-primary" href="/vps"><i class="fa-solid fa-server"></i> Browse Instances</a>
+    </div>
+  </div>
+
+  <div class="card reveal" data-skeleton="600">
+    <div class="card-title"><i class="fa-solid fa-network-wired"></i> Available Nodes</div>
+    {% if nodes %}
+      {% for n in nodes %}
+      <div class="list-row">
+        <div class="list-icon"><i class="fa-solid fa-microchip"></i></div>
+        <div style="flex:1">
+          <strong>{{ n['name'] }}</strong> <span class="dim">{{ n['location'] or '' }}</span>
+          <div class="res-bar"><span data-fill="{{ (n['used_ram'] / n['total_ram'] * 100) if n['total_ram'] else 0 }}"></span></div>
+          <div class="res-meta"><span>RAM {{ n['used_ram'] }}/{{ n['total_ram'] }}MB</span><span>VPS {{ n['vps_count'] }}</span></div>
+        </div>
+        <span class="badge {{ n['status']|status_class }}">{{ n['status']|pretty_status }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty" style="padding:26px">
+        <div class="e-icon"><i class="fa-solid fa-plug"></i></div>
+        <h4>No nodes registered</h4>
+        <p>Register one with <span class="mono">!node-add</span> in Discord.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

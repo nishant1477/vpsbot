@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_sub %}Fleet overview — live from the bot database{% endblock %}
+
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card reveal" data-skeleton="400">
+    <div class="stat-icon purple"><i class="fa-solid fa-server"></i></div>
+    <div>
+      <div class="stat-value" data-count="{{ stats.total_vps }}">0</div>
+      <div class="stat-label">Total VPS</div>
+    </div>
+  </div>
+  <div class="stat-card reveal" data-skeleton="500">
+    <div class="stat-icon green"><i class="fa-solid fa-circle-play"></i></div>
+    <div>
+      <div class="stat-value" data-count="{{ stats.running_vps }}">0</div>
+      <div class="stat-label">Running</div>
+    </div>
+  </div>
+  <div class="stat-card reveal" data-skeleton="600">
+    <div class="stat-icon blue"><i class="fa-solid fa-network-wired"></i></div>
+    <div>
+      <div class="stat-value" data-count="{{ stats.online_nodes }}" data-suffix="/{{ stats.total_nodes }}">0</div>
+      <div class="stat-label">Nodes Online</div>
+    </div>
+  </div>
+  <div class="stat-card reveal" data-skeleton="700">
+    <div class="stat-icon amber"><i class="fa-solid fa-headset"></i></div>
+    <div>
+      <div class="stat-value" data-count="{{ stats.open_tickets }}">0</div>
+      <div class="stat-label">Open Tickets</div>
+    </div>
+  </div>
+  <div class="stat-card reveal" data-skeleton="800">
+    <div class="stat-icon red"><i class="fa-solid fa-users"></i></div>
+    <div>
+      <div class="stat-value" data-count="{{ stats.users }}">0</div>
+      <div class="stat-label">Registered Users</div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card reveal" data-skeleton="900">
+    <div class="card-title"><i class="fa-solid fa-server"></i> Recent VPS</div>
+    <div class="table-wrap">
+      {% if recent_vps %}
+      <table>
+        <thead><tr><th>Name</th><th>Owner</th><th>Node</th><th>Specs</th><th>IP</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for v in recent_vps %}
+          <tr>
+            <td><strong>{{ v['name'] }}</strong><br><span class="mono dim">{{ v['hostname'] }}</span></td>
+            <td>{{ v['owner_name'] or '—' }}</td>
+            <td>{{ v['node_name'] or '—' }}</td>
+            <td class="dim">{{ v['ram'] }}MB · {{ v['cpu'] }}c · {{ v['disk'] }}GB</td>
+            <td class="mono">{{ v['ip_address'] or '—' }}</td>
+            <td><span class="badge {{ v['status']|status_class }}"><span class="pulse-dot {{ v['status']|status_class }}"></span> {{ v['status']|pretty_status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">
+        <div class="e-icon"><i class="fa-solid fa-rocket"></i></div>
+        <h4>No VPS yet</h4>
+        <p>Run <span class="mono">!create</span> in Discord to deploy your first instance.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card reveal" data-skeleton="1000">
+      <div class="card-title"><i class="fa-solid fa-gauge"></i> Node Health</div>
+      {% if nodes %}
+        {% for n in nodes[:4] %}
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong style="font-size:13.5px"><span class="pulse-dot {{ 'ok' if n['status'] == 'ONLINE' else 'bad' }}"></span> {{ n['name'] }}</strong>
+            <span class="badge {{ n['status']|status_class }}">{{ n['status']|pretty_status }}</span>
+          </div>
+          <div class="res-bar"><span data-fill="{{ (n['used_ram'] / n['total_ram'] * 100) if n['total_ram'] else 0 }}"></span></div>
+          <div class="res-meta"><span>RAM {{ n['used_ram'] }}/{{ n['total_ram'] }}MB</span><span>{{ n['latency'] }}ms</span></div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:22px">
+          <div class="e-icon"><i class="fa-solid fa-plus"></i></div>
+          <h4>No nodes</h4>
+          <p>Add nodes with <span class="mono">!node-add</span></p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card reveal" data-skeleton="1100">
+      <div class="card-title"><i class="fa-solid fa-bolt"></i> Quick Actions</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <a class="btn btn-primary btn-sm" href="/vps/create"><i class="fa-solid fa-plus"></i> New VPS</a>
+        <a class="btn btn-ghost btn-sm" href="/monitoring"><i class="fa-solid fa-wave-square"></i> Monitor</a>
+        <a class="btn btn-ghost btn-sm" href="/tickets"><i class="fa-solid fa-headset"></i> Tickets</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

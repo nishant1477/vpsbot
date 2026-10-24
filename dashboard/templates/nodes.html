@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Nodes{% endblock %}
+{% block page_title %}Nodes{% endblock %}
+{% block page_sub %}Multi-node fleet — agents report every 30s via heartbeat{% endblock %}
+
+{% block content %}
+{% if nodes %}
+<div class="node-grid">
+  {% for n in nodes %}
+  <div class="card node-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div style="font-weight:700;font-size:16px">
+          <span class="pulse-dot {{ 'ok' if n['status'] == 'ONLINE' else ('warn' if n['status'] == 'MAINTENANCE' else 'bad') }}"></span>
+          {{ n['name'] }}
+        </div>
+        <div class="dim mono" style="font-size:11.5px;margin-top:3px">{{ n['host'] }}:{{ n['port'] }} • {{ n['location'] or 'unknown' }}</div>
+      </div>
+      <span class="badge {{ n['status']|status_class }}">{{ n['status']|pretty_status }}</span>
+    </div>
+
+    <div style="margin-bottom:10px">
+      {% set ram_pct = ((n['used_ram'] / n['total_ram'] * 100)|round(1)) if n['total_ram'] else 0 %}
+      <div class="res-meta"><span>RAM</span><span>{{ ram_pct }}%</span></div>
+      <div class="res-bar"><span data-fill="{{ ram_pct }}"></span></div>
+      <div class="res-meta" style="margin-top:4px"><span>{{ n['used_ram'] }} MB used</span><span>{{ n['total_ram'] }} MB total</span></div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      {% set disk_pct = ((n['used_disk'] / n['total_disk'] * 100)|round(1)) if n['total_disk'] else 0 %}
+      <div class="res-meta"><span>Disk</span><span>{{ disk_pct }}%</span></div>
+      <div class="res-bar"><span data-fill="{{ disk_pct }}"></span></div>
+    </div>
+
+    <div class="res-meta">
+      <span><i class="fa-solid fa-bolt"></i> CPU {{ n['used_cpu'] or 0 }}%</span>
+      <span><i class="fa-solid fa-server"></i> {{ n['vps_count'] }} VPS</span>
+      <span><i class="fa-solid fa-wave-square"></i> {{ n['latency'] }}ms</span>
+    </div>
+
+    <div class="dim" style="font-size:11px;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <i class="fa-solid fa-clock"></i> Last heartbeat: {{ n['last_heartbeat']|ts }}
+      {% if n['maintenance_mode'] %} • <span style="color:var(--amber)">🛠️ maintenance</span>{% endif %}
+      {% if not n['is_active'] %} • <span style="color:var(--red)">inactive</span>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card reveal" data-skeleton="500">
+  <div class="empty">
+    <div class="e-icon"><i class="fa-solid fa-network-wired"></i></div>
+    <h4>No nodes registered</h4>
+    <p>Use <span class="mono">!node-add</span> in Discord, then install the node agent on the target host.</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

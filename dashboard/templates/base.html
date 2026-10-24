@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} • {{ bot_name }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="aurora"></div>
+
+  {# server flash messages → rendered hidden, converted to toasts by JS #}
+  <div class="flash-data">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <span class="flash-item" data-cat="{{ cat }}">{{ msg }}</span>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">A</div>
+        <div>
+          <div class="brand-name">{{ bot_name }}</div>
+          <div class="brand-sub">Hosting Automation</div>
+        </div>
+      </div>
+
+      <div class="nav-section">Overview</div>
+      <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a class="nav-link {% if request.path.startswith('/monitoring') %}active{% endif %}" href="/monitoring"><i class="fa-solid fa-wave-square"></i> Monitoring</a>
+
+      <div class="nav-section">Infrastructure</div>
+      <a class="nav-link {% if request.path.startswith('/vps') %}active{% endif %}" href="/vps"><i class="fa-solid fa-server"></i> VPS Instances</a>
+      <a class="nav-link {% if request.path.startswith('/nodes') %}active{% endif %}" href="/nodes"><i class="fa-solid fa-network-wired"></i> Nodes</a>
+
+      <div class="nav-section">Business</div>
+      <a class="nav-link {% if request.path.startswith('/tickets') %}active{% endif %}" href="/tickets"><i class="fa-solid fa-headset"></i> Tickets</a>
+      <a class="nav-link {% if request.path.startswith('/billing') %}active{% endif %}" href="/billing"><i class="fa-solid fa-wallet"></i> Billing</a>
+
+      <div class="nav-section">System</div>
+      <a class="nav-link {% if request.path.startswith('/settings') %}active{% endif %}" href="/settings"><i class="fa-solid fa-sliders"></i> Settings</a>
+
+      <div style="flex:1"></div>
+      <a class="nav-link" href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
+          <div>
+            <div class="page-title">{% block page_title %}{% endblock %}</div>
+            <div class="page-sub">{% block page_sub %}{% endblock %}</div>
+          </div>
+        </div>
+        <div class="user-chip">
+          <span id="live-clock" class="mono dim" style="font-size:12px"></span>
+          <div class="avatar">{{ session['user']['display'][:1]|upper if session.get('user') else '?' }}</div>
+          <div>
+            <div class="name">{{ session['user']['display'] if session.get('user') else 'Guest' }}</div>
+            <div class="role">{{ session['user']['role'] if session.get('user') else '' }}</div>
+          </div>
+        </div>
+      </div>
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

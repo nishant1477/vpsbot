@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Monitoring{% endblock %}
+{% block page_title %}Monitoring{% endblock %}
+{% block page_sub %}Live agent metrics — auto-refresh every 30s{% endblock %}
+
+{% block content %}
+<div data-autorefresh="30">
+  {% if nodes %}
+  <div class="stat-grid mb-20">
+    {% set online = nodes | selectattr('status', 'equalto', 'ONLINE') | list | length %}
+    <div class="stat-card reveal">
+      <div class="stat-icon green"><i class="fa-solid fa-tower-broadcast"></i></div>
+      <div><div class="stat-value" data-count="{{ online }}">0</div><div class="stat-label">Agents Online</div></div>
+    </div>
+    {% set total_ram_used = nodes | sum(attribute='used_ram') %}
+    {% set total_ram = nodes | sum(attribute='total_ram') %}
+    <div class="stat-card reveal">
+      <div class="stat-icon purple"><i class="fa-solid fa-memory"></i></div>
+      <div style="width:100%">
+        <div class="stat-value" data-count="{{ total_ram_used }}" data-suffix=" MB">0</div>
+        <div class="stat-label">Fleet RAM used / {{ total_ram }} MB</div>
+        <div class="res-bar"><span data-fill="{{ (total_ram_used / total_ram * 100) if total_ram else 0 }}"></span></div>
+      </div>
+    </div>
+    {% set total_vps = nodes | sum(attribute='vps_count') %}
+    <div class="stat-card reveal">
+      <div class="stat-icon blue"><i class="fa-solid fa-server"></i></div>
+      <div><div class="stat-value" data-count="{{ total_vps }}">0</div><div class="stat-label">Instances hosted</div></div>
+    </div>
+  </div>
+
+  <div class="card" data-skeleton="600">
+    <div class="card-title"><i class="fa-solid fa-wave-square"></i> Per-node metrics</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Node</th><th>Status</th><th>CPU</th><th>RAM</th><th>Disk</th><th>VPS</th><th>Ping</th><th>Agent</th></tr></thead>
+        <tbody>
+          {% for n in nodes %}
+          {% set ram_pct = ((n['used_ram'] / n['total_ram'] * 100)|round(1)) if n['total_ram'] else 0 %}
+          {% set disk_pct = ((n['used_disk'] / n['total_disk'] * 100)|round(1)) if n['total_disk'] else 0 %}
+          <tr>
+            <td><strong>{{ n['name'] }}</strong><br><span class="mono dim" style="font-size:11px">{{ n['host'] }}:{{ n['port'] }}</span></td>
+            <td><span class="badge {{ n['status']|status_class }}"><span class="pulse-dot {{ 'ok' if n['status'] == 'ONLINE' else 'bad' }}"></span> {{ n['status']|pretty_status }}</span></td>
+            <td style="min-width:130px">
+              {{ n['used_cpu'] or 0 }}%
+              <div class="res-bar"><span data-fill="{{ n['used_cpu'] or 0 }}"></span></div>
+            </td>
+            <td style="min-width:130px">
+              {{ ram_pct }}%
+              <div class="res-bar"><span data-fill="{{ ram_pct }}"></span></div>
+            </td>
+            <td style="min-width:130px">
+              {{ disk_pct }}%
+              <div class="res-bar"><span data-fill="{{ disk_pct }}"></span></div>
+            </td>
+            <td>{{ n['vps_count'] }}</td>
+            <td>{{ n['latency'] }}ms</td>
+            <td class="mono dim">{{ n['agent_version'] or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card reveal" data-skeleton="500">
+    <div class="empty">
+      <div class="e-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+      <h4>No monitoring data</h4>
+      <p>Node agents report here once you register nodes with <span class="mono">!node-add</span>.</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

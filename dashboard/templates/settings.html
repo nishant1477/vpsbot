@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block page_sub %}Panel account & bot configuration snapshot{% endblock %}
+
+{% block content %}
+<div class="grid-half">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card reveal" data-skeleton="400">
+      <div class="card-title"><i class="fa-solid fa-lock"></i> Change Password</div>
+      <form method="post" action="/settings/password" data-loading>
+        <div class="form-group">
+          <label>Current password</label>
+          <input class="input" type="password" name="current_password" required>
+        </div>
+        <div class="form-group">
+          <label>New password</label>
+          <input class="input" type="password" name="new_password" minlength="8" required>
+          <div class="hint">Minimum 8 characters.</div>
+        </div>
+        <button type="submit" class="btn btn-primary"><span class="spinner"></span> Update Password</button>
+      </form>
+    </div>
+
+    <div class="card reveal" data-skeleton="600">
+      <div class="card-title"><i class="fa-solid fa-robot"></i> AI Assistant</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="ai-chip"><i class="fa-solid fa-bolt"></i> {{ 'Enabled' if cfg.ai_enabled else 'Disabled' }}</span>
+        <span class="ai-chip"><i class="fa-solid fa-brain"></i> {{ cfg.ai_model }}</span>
+      </div>
+      <p class="dim" style="font-size:12.5px;line-height:1.7">
+        The AI assistant answers hosting questions directly in Discord. Configure it via
+        <span class="mono">AI_API_KEY</span>, <span class="mono">AI_BASE_URL</span> and
+        <span class="mono">AI_MODEL</span> in <span class="mono">.env</span> — any
+        OpenAI-compatible provider works (OpenAI, Groq, Z.ai, local LLMs).
+      </p>
+    </div>
+
+    <div class="card reveal" data-skeleton="800">
+      <div class="card-title"><i class="fa-solid fa-user-group"></i> Panel Users</div>
+      {% if dashboard_users %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Role</th><th>Last login</th><th>Created</th></tr></thead>
+          <tbody>
+            {% for u in dashboard_users %}
+            <tr>
+              <td><strong>{{ u['username'] }}</strong></td>
+              <td><span class="badge {{ 'ok' if u['role'] == 'admin' else 'info' }}">{{ u['role'] }}</span></td>
+              <td class="dim">{{ u['last_login']|ts }}</td>
+              <td class="dim">{{ u['created_at']|ts }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="dim" style="font-size:13px">No panel users found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card reveal" data-skeleton="500">
+    <div class="card-title"><i class="fa-solid fa-sliders"></i> Bot Configuration</div>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><td class="dim">Bot name</td><td>{{ cfg.bot_name }}</td></tr>
+          <tr><td class="dim">Prefix</td><td class="mono">{{ cfg.prefix }}</td></tr>
+          <tr><td class="dim">Guardian security</td><td><span class="badge {{ 'ok' if cfg.guardian else 'muted' }}">{{ 'On' if cfg.guardian else 'Off' }}</span></td></tr>
+          <tr><td class="dim">Auto backups</td><td><span class="badge {{ 'ok' if cfg.backups else 'muted' }}">{{ 'On' if cfg.backups else 'Off' }}</span></td></tr>
+          <tr><td class="dim">Dashboard</td><td><span class="badge {{ 'ok' if cfg.dashboard_enabled else 'muted' }}">{{ 'On' if cfg.dashboard_enabled else 'Off' }}</span></td></tr>
+          <tr><td class="dim">Node timeout</td><td>{{ cfg.node_timeout }}s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hint" style="margin-top:14px">
+      These values come from <span class="mono">.env</span>. Edit the file and restart the bot to apply changes.
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+[Unit]
+Description=Arqon Host VPS Bot — Discord Hosting Bot
+After=network.target
+
+[Service]
+Type=simple
+User=arqon
+WorkingDirectory=/opt/arqon-host
+Environment=PATH=/opt/arqon-host/venv/bin
+ExecStart=/opt/arqon-host/venv/bin/python bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

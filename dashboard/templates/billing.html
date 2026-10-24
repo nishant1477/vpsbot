@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Billing{% endblock %}
+{% block page_title %}Billing{% endblock %}
+{% block page_sub %}Fleet revenue {{ '$%.2f'|format(total_balance) }} across {{ wallets|length }} wallet(s){% endblock %}
+
+{% block content %}
+<div class="grid-2">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card reveal" data-skeleton="400">
+      <div class="card-title"><i class="fa-solid fa-wallet"></i> Wallets</div>
+      {% if wallets %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Balance</th><th>Currency</th><th>State</th></tr></thead>
+          <tbody>
+            {% for w in wallets %}
+            <tr>
+              <td>{{ w['username'] or w['user_id'] }}</td>
+              <td class="mono"><strong>${ '%.2f'|format((w['balance'] or 0) / 100) }</strong></td>
+              <td>{{ w['currency'] }}</td>
+              <td><span class="badge {{ 'bad' if w['is_frozen'] else 'ok' }}">{{ 'Frozen' if w['is_frozen'] else 'Active' }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty" style="padding:24px">
+        <div class="e-icon"><i class="fa-solid fa-wallet"></i></div>
+        <h4>No wallets yet</h4>
+        <p>Users create wallets with <span class="mono">!deposit</span>.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card reveal" data-skeleton="700">
+      <div class="card-title"><i class="fa-solid fa-right-left"></i> Recent Transactions</div>
+      {% if transactions %}
+        {% for t in transactions[:12] %}
+        <div class="list-row">
+          <div class="list-icon"><i class="fa-solid fa-{{ 'arrow-up' if t['type'] == 'DEPOSIT' else 'arrow-down' }}"></i></div>
+          <div style="flex:1">
+            <strong style="font-size:13px">{{ t['username'] or 'Unknown' }} — {{ t['type']|pretty_status }}</strong>
+            <div class="dim" style="font-size:11.5px">{{ t['created_at']|ts }} • {{ t['description'] or '' }}</div>
+          </div>
+          <div style="text-align:right">
+            <strong class="mono">${ '%.2f'|format((t['amount'] or 0) / 100) }</strong><br>
+            <span class="badge {{ t['status']|status_class }}">{{ t['status']|pretty_status }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:24px">
+          <div class="e-icon"><i class="fa-solid fa-right-left"></i></div>
+          <h4>No transactions</h4>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card reveal" data-skeleton="500">
+      <div class="card-title"><i class="fa-solid fa-box-open"></i> Plans</div>
+      {% if plans %}
+        {% for p in plans %}
+        <div class="list-row">
+          <div class="list-icon"><i class="fa-solid fa-cube"></i></div>
+          <div style="flex:1">
+            <strong>{{ p['name'] }}</strong>
+            <div class="dim" style="font-size:11.5px">{{ p['ram'] }}MB • {{ p['cpu'] }} vCPU • {{ p['disk'] }}GB</div>
+          </div>
+          <strong class="mono">${ '%.2f'|format((p['price'] or 0) / 100) }</strong>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:22px">
+          <div class="e-icon"><i class="fa-solid fa-cube"></i></div>
+          <h4>No plans</h4>
+          <p>Create plans in the <span class="mono">plans</span> table or via bot commands.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card reveal" data-skeleton="800">
+      <div class="card-title"><i class="fa-solid fa-file-invoice-dollar"></i> Recent Invoices</div>
+      {% if invoices %}
+        {% for i in invoices[:10] %}
+        <div class="list-row">
+          <div class="list-icon"><i class="fa-solid fa-file-invoice"></i></div>
+          <div style="flex:1">
+            <strong class="mono" style="font-size:12.5px">{{ i['invoice_number'] }}</strong>
+            <div class="dim" style="font-size:11.5px">{{ i['username'] or '' }} • due {{ i['due_date']|ts }}</div>
+          </div>
+          <div style="text-align:right">
+            <strong class="mono">${ '%.2f'|format((i['amount'] or 0) / 100) }</strong><br>
+            <span class="badge {{ i['status']|status_class }}">{{ i['status']|pretty_status }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:22px">
+          <div class="e-icon"><i class="fa-solid fa-file-invoice"></i></div>
+          <h4>No invoices</h4>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

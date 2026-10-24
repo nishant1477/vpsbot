@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ vps['name'] }}{% endblock %}
+{% block page_title %}{{ vps['name'] }}{% endblock %}
+{% block page_sub %}Instance #{{ vps['id'] }} • {{ vps['hostname'] }}{% endblock %}
+
+{% block content %}
+<div class="grid-half">
+  <div class="card reveal" data-skeleton="400">
+    <div class="card-title"><i class="fa-solid fa-circle-info"></i> Instance Details</div>
+    <div class="table-wrap">
+      <table>
+        <tbody>
+          <tr><td class="dim">Status</td><td><span class="badge {{ vps['status']|status_class }}"><span class="pulse-dot {{ vps['status']|status_class }}"></span> {{ vps['status']|pretty_status }}</span></td></tr>
+          <tr><td class="dim">Owner</td><td>{{ vps['owner_name'] or '—' }} <span class="mono dim">({{ vps['discord_id'] }})</span></td></tr>
+          <tr><td class="dim">Node</td><td>{{ vps['node_name'] or '—' }} <span class="mono dim">{{ vps['node_host'] or '' }}</span></td></tr>
+          <tr><td class="dim">RAM</td><td>{{ vps['ram'] }} MB</td></tr>
+          <tr><td class="dim">CPU</td><td>{{ vps['cpu'] }} core(s)</td></tr>
+          <tr><td class="dim">Disk</td><td>{{ vps['disk'] }} GB</td></tr>
+          <tr><td class="dim">OS</td><td class="mono">{{ vps['os_template'] }}</td></tr>
+          <tr><td class="dim">Virtualization</td><td>{{ vps['virtualization']|pretty_status if vps['virtualization'] else '—' }}</td></tr>
+          <tr><td class="dim">IPv4</td><td class="mono">{{ vps['ip_address'] or 'pending' }}</td></tr>
+          <tr><td class="dim">IPv6</td><td class="mono">{{ vps['ipv6_address'] or '—' }}</td></tr>
+          <tr><td class="dim">SSH Port</td><td class="mono">{{ vps['ssh_port'] }}</td></tr>
+          <tr><td class="dim">Backups</td><td>{{ 'Enabled' if vps['backup_enabled'] else 'Disabled' }} • last: {{ vps['last_backup']|ts }}</td></tr>
+          <tr><td class="dim">Created</td><td>{{ vps['created_at']|ts }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="card reveal" data-skeleton="600">
+      <div class="card-title"><i class="fa-solid fa-terminal"></i> Management</div>
+      <p class="dim" style="font-size:13px;margin-bottom:14px">Power actions run in Discord with full audit logging:</p>
+      <div class="mono dim" style="background:var(--surface-2);border-radius:10px;padding:12px;font-size:12.5px;line-height:2">
+        !vps {{ vps['id'] }}<br>
+        !reinstall {{ vps['id'] }}<br>
+        !backup {{ vps['id'] }}<br>
+        !fw-allow {{ vps['id'] }} &lt;port&gt;
+      </div>
+    </div>
+
+    <div class="card reveal" data-skeleton="800">
+      <div class="card-title"><i class="fa-solid fa-box-archive"></i> Backups ({{ backups|length }})</div>
+      {% if backups %}
+        {% for b in backups %}
+        <div class="list-row">
+          <div class="list-icon"><i class="fa-solid fa-box-archive"></i></div>
+          <div style="flex:1">
+            <strong style="font-size:13px">{{ b['name'] }}</strong>
+            <div class="dim" style="font-size:11.5px">{{ b['created_at']|ts }} • {{ b['file_size']|human_bytes }}</div>
+          </div>
+          <span class="badge {{ b['status']|status_class }}">{{ b['status']|pretty_status }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty" style="padding:20px">
+          <div class="e-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+          <h4>No backups yet</h4>
+          <p>Create one with <span class="mono">!backup {{ vps['id'] }}</span></p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+[Unit]
+Description=Arqon Host — Node Agent (VPS Management API)
+After=network.target docker.service libvirtd.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/arqon-node/node-agent
+Environment=PATH=/opt/arqon-node/venv/bin
+ExecStart=/opt/arqon-node/venv/bin/python agent.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

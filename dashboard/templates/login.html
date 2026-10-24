@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login • {{ bot_name }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <div class="flash-data">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <span class="flash-item" data-cat="{{ cat }}">{{ msg }}</span>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">A</div>
+      <div class="auth-title">{{ bot_name }}</div>
+      <div class="auth-sub">Sign in to manage your hosting fleet</div>
+
+      <form method="post" data-loading>
+        <div class="form-group">
+          <label>Username</label>
+          <input class="input" type="text" name="username" placeholder="admin" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input class="input" type="password" name="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px">
+          <span class="spinner"></span> Sign In <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </button>
+      </form>
+
+      <p class="hint" style="text-align:center;margin-top:18px">
+        <i class="fa-solid fa-shield-halved"></i> First run? Default credentials: <span class="mono">admin / arqon-admin</span> — change them in Settings.
+      </p>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
